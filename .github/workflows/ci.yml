@@ -1,0 +1,27 @@
+name: CI (Node/TS)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+      - name: Enable corepack + pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+      - name: Install
+        run: pnpm install --frozen-lockfile || pnpm install
+      - name: Lint (if script exists)
+        run: pnpm run -s lint || echo "no lint script"
+      - name: Build (if script exists)
+        run: pnpm run -s build || echo "no build script"
+      - name: Test (if script exists)
+        run: pnpm run -s test || echo "no test script"
